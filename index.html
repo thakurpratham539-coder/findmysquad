@@ -1,20 +1,894 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page Title</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>FindMySquad 🎮</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b14;
+  --bg2: #0d1220;
+  --bg3: #111827;
+  --card: #131929;
+  --card2: #1a2235;
+  --border: #1e2d45;
+  --accent: #00f5ff;
+  --accent2: #7c3aed;
+  --accent3: #f59e0b;
+  --green: #10b981;
+  --red: #ef4444;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --text3: #4b5563;
+  --glow: 0 0 20px rgba(0,245,255,0.3);
+  --glow2: 0 0 20px rgba(124,58,237,0.3);
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; background:var(--bg); color:var(--text); font-family:'Exo 2',sans-serif; overflow:hidden; }
+
+/* APP WRAPPER */
+#app { width:100%; max-width:420px; height:100vh; margin:0 auto; position:relative; background:var(--bg); display:flex; flex-direction:column; overflow:hidden; }
+
+/* SCREENS */
+.screen { position:absolute; inset:0; display:flex; flex-direction:column; background:var(--bg); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s; }
+.screen.hidden { transform:translateX(100%); opacity:0; pointer-events:none; }
+.screen.slide-left { transform:translateX(-30%); opacity:0; pointer-events:none; }
+
+/* TOPBAR */
+.topbar { padding:16px 20px 12px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:var(--bg); flex-shrink:0; }
+.topbar-logo { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:var(--accent); letter-spacing:1px; text-shadow:var(--glow); }
+.topbar-title { font-family:'Rajdhani',sans-serif; font-size:18px; font-weight:600; color:var(--text); }
+.topbar-icon { width:36px; height:36px; border-radius:50%; background:var(--card2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; }
+
+/* SCROLL CONTENT */
+.scroll-content { flex:1; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; }
+.scroll-content::-webkit-scrollbar { display:none; }
+
+/* BOTTOM NAV */
+.bottomnav { display:flex; background:var(--bg2); border-top:1px solid var(--border); flex-shrink:0; }
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; padding:10px 0 14px; cursor:pointer; gap:4px; transition:all 0.2s; position:relative; }
+.nav-item .nav-icon { font-size:20px; transition:transform 0.2s; }
+.nav-item .nav-label { font-size:10px; font-weight:600; color:var(--text3); letter-spacing:0.5px; font-family:'Rajdhani',sans-serif; }
+.nav-item.active .nav-icon { transform:scale(1.1); }
+.nav-item.active .nav-label { color:var(--accent); }
+.nav-item.active::before { content:''; position:absolute; top:0; left:50%; transform:translateX(-50%); width:32px; height:2px; background:var(--accent); border-radius:0 0 4px 4px; box-shadow:var(--glow); }
+.nav-post { flex:1; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.nav-post-btn { width:44px; height:44px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 0 24px rgba(0,245,255,0.4); transition:transform 0.2s; }
+.nav-post-btn:active { transform:scale(0.92); }
+
+/* ========== LANDING ========== */
+#landing { background:var(--bg); justify-content:center; align-items:center; padding:40px 28px; gap:0; }
+.landing-bg { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.landing-bg::before { content:''; position:absolute; top:-100px; left:-100px; width:400px; height:400px; background:radial-gradient(circle, rgba(0,245,255,0.08) 0%, transparent 70%); animation:pulse 4s ease-in-out infinite; }
+.landing-bg::after { content:''; position:absolute; bottom:-100px; right:-100px; width:350px; height:350px; background:radial-gradient(circle, rgba(124,58,237,0.08) 0%, transparent 70%); animation:pulse 4s ease-in-out infinite 2s; }
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.1);opacity:0.7} }
+.landing-content { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; width:100%; }
+.landing-logo-wrap { width:90px; height:90px; border-radius:24px; background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(124,58,237,0.15)); border:1px solid rgba(0,245,255,0.3); display:flex; align-items:center; justify-content:center; font-size:44px; margin-bottom:28px; box-shadow:0 0 40px rgba(0,245,255,0.2); animation:float 3s ease-in-out infinite; }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.landing-title { font-family:'Rajdhani',sans-serif; font-size:38px; font-weight:700; color:var(--accent); text-shadow:var(--glow); letter-spacing:2px; margin-bottom:8px; }
+.landing-sub { font-size:13px; color:var(--text2); text-align:center; line-height:1.6; margin-bottom:48px; max-width:280px; }
+.landing-sub span { color:var(--accent); font-weight:600; }
+.btn-primary { width:100%; padding:16px; border-radius:14px; background:linear-gradient(135deg,var(--accent),#00b8d4); border:none; color:#000; font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:700; letter-spacing:1px; cursor:pointer; transition:all 0.2s; box-shadow:0 0 30px rgba(0,245,255,0.3); margin-bottom:12px; }
+.btn-primary:active { transform:scale(0.97); }
+.btn-secondary { width:100%; padding:15px; border-radius:14px; background:transparent; border:1px solid var(--border); color:var(--text2); font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:600; letter-spacing:1px; cursor:pointer; transition:all 0.2s; }
+.btn-secondary:active { background:var(--card); }
+.landing-tags { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:40px; }
+.tag { padding:6px 14px; border-radius:20px; background:var(--card); border:1px solid var(--border); font-size:12px; color:var(--text2); font-family:'Rajdhani',sans-serif; font-weight:600; }
+
+/* ========== FEED ========== */
+.feed-item { background:var(--card); border-bottom:1px solid var(--border); overflow:hidden; }
+.feed-header { padding:14px 16px 10px; display:flex; align-items:center; gap:10px; }
+.feed-avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--accent); flex-shrink:0; font-size:18px; display:flex; align-items:center; justify-content:center; background:var(--card2); }
+.feed-user-info { flex:1; }
+.feed-username { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; color:var(--text); }
+.feed-game-tag { font-size:11px; color:var(--accent); font-weight:600; }
+.feed-follow-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--accent); background:transparent; color:var(--accent); font-size:12px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; transition:all 0.2s; }
+.feed-follow-btn.following { background:var(--accent); color:#000; border-color:var(--accent); }
+.feed-video { width:100%; aspect-ratio:9/16; max-height:420px; background:var(--bg3); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; cursor:pointer; }
+.feed-video-thumb { width:100%; height:100%; object-fit:cover; }
+.feed-video-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.2); }
+.play-btn { width:56px; height:56px; border-radius:50%; background:rgba(0,245,255,0.2); border:2px solid var(--accent); display:flex; align-items:center; justify-content:center; font-size:22px; backdrop-filter:blur(4px); }
+.feed-game-label { position:absolute; top:12px; left:12px; padding:4px 10px; border-radius:20px; background:rgba(0,0,0,0.7); border:1px solid rgba(0,245,255,0.3); font-size:11px; color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:700; backdrop-filter:blur(4px); }
+.feed-id-badge { position:absolute; bottom:12px; left:12px; right:12px; padding:8px 12px; border-radius:10px; background:rgba(0,0,0,0.8); border:1px solid rgba(0,245,255,0.3); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:space-between; }
+.feed-id-text { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); }
+.copy-id-btn { padding:4px 10px; border-radius:6px; background:var(--accent); color:#000; font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:700; border:none; cursor:pointer; }
+.feed-actions { padding:12px 16px; display:flex; align-items:center; gap:20px; }
+.action-btn { display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--text2); font-size:13px; cursor:pointer; font-family:'Exo 2',sans-serif; transition:color 0.2s; }
+.action-btn:active { color:var(--accent); }
+.action-btn.liked { color:var(--red); }
+.action-btn span { font-size:18px; }
+.feed-caption { padding:0 16px 12px; font-size:13px; color:var(--text2); line-height:1.5; }
+.feed-caption strong { color:var(--text); }
+.feed-connect { padding:0 16px 16px; display:flex; gap:8px; }
+.connect-ig { flex:1; padding:9px; border-radius:10px; border:1px solid #e1306c; background:transparent; color:#e1306c; font-size:12px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+.connect-game { flex:1; padding:9px; border-radius:10px; border:1px solid var(--accent2); background:transparent; color:#a78bfa; font-size:12px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+
+/* ========== HUNT ========== */
+.search-bar-wrap { padding:12px 16px; background:var(--bg); border-bottom:1px solid var(--border); flex-shrink:0; }
+.search-bar { width:100%; padding:12px 16px; border-radius:12px; background:var(--card); border:1px solid var(--border); color:var(--text); font-size:14px; font-family:'Exo 2',sans-serif; outline:none; transition:border-color 0.2s; }
+.search-bar:focus { border-color:var(--accent); }
+.search-bar::placeholder { color:var(--text3); }
+.filter-row { padding:10px 16px; display:flex; gap:8px; overflow-x:auto; flex-shrink:0; }
+.filter-row::-webkit-scrollbar { display:none; }
+.filter-chip { padding:7px 14px; border-radius:20px; border:1px solid var(--border); background:var(--card); color:var(--text2); font-size:12px; font-family:'Rajdhani',sans-serif; font-weight:600; cursor:pointer; white-space:nowrap; transition:all 0.2s; flex-shrink:0; }
+.filter-chip.active { background:rgba(0,245,255,0.1); border-color:var(--accent); color:var(--accent); }
+.player-card { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer; transition:background 0.2s; }
+.player-card:active { background:var(--card); }
+.player-card-avatar { width:52px; height:52px; border-radius:14px; background:var(--card2); border:2px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; position:relative; }
+.online-dot { position:absolute; bottom:2px; right:2px; width:10px; height:10px; border-radius:50%; background:var(--green); border:2px solid var(--bg); }
+.player-card-info { flex:1; }
+.player-card-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; color:var(--text); }
+.player-card-meta { font-size:12px; color:var(--text2); margin-top:2px; }
+.player-card-games { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+.game-chip { padding:3px 8px; border-radius:6px; background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.2); font-size:10px; color:var(--accent); font-family:'Rajdhani',sans-serif; font-weight:700; }
+.squad-badge { padding:4px 10px; border-radius:20px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); font-size:11px; color:var(--green); font-family:'Rajdhani',sans-serif; font-weight:700; flex-shrink:0; }
+
+/* ========== PROFILE ========== */
+.profile-banner { width:100%; height:130px; background:linear-gradient(135deg,#0d1f3c,#1a0a2e); position:relative; overflow:hidden; flex-shrink:0; }
+.profile-banner::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 50%, rgba(0,245,255,0.15) 0%, transparent 60%); }
+.profile-banner::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 70% 50%, rgba(124,58,237,0.15) 0%, transparent 60%); }
+.profile-info-wrap { padding:0 20px 16px; position:relative; flex-shrink:0; }
+.profile-avatar-wrap { margin-top:-36px; margin-bottom:12px; display:flex; align-items:flex-end; justify-content:space-between; }
+.profile-avatar { width:72px; height:72px; border-radius:20px; background:var(--card2); border:3px solid var(--bg); display:flex; align-items:center; justify-content:center; font-size:36px; position:relative; }
+.profile-edit-btn { padding:9px 20px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:var(--text); font-size:13px; font-family:'Rajdhani',sans-serif; font-weight:600; cursor:pointer; }
+.profile-name { font-family:'Rajdhani',sans-serif; font-size:22px; font-weight:700; color:var(--text); }
+.profile-handle { font-size:13px; color:var(--text2); margin-bottom:8px; }
+.profile-bio { font-size:13px; color:var(--text2); line-height:1.5; margin-bottom:14px; }
+.profile-stats { display:flex; gap:0; margin-bottom:16px; }
+.stat-item { flex:1; text-align:center; padding:10px 0; border-right:1px solid var(--border); }
+.stat-item:last-child { border-right:none; }
+.stat-num { font-family:'Rajdhani',sans-serif; font-size:20px; font-weight:700; color:var(--text); }
+.stat-label { font-size:11px; color:var(--text2); margin-top:2px; }
+.profile-social { display:flex; gap:8px; margin-bottom:16px; }
+.social-btn { flex:1; padding:9px; border-radius:10px; border:1px solid var(--border); background:var(--card); display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; font-family:'Rajdhani',sans-serif; font-weight:600; color:var(--text2); cursor:pointer; }
+.squad-toggle { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:12px; background:var(--card); border:1px solid var(--border); margin-bottom:16px; }
+.squad-toggle-label { font-family:'Rajdhani',sans-serif; font-weight:600; font-size:14px; color:var(--text); }
+.squad-toggle-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.toggle-switch { width:44px; height:24px; border-radius:12px; background:var(--card2); border:1px solid var(--border); position:relative; cursor:pointer; transition:background 0.2s; }
+.toggle-switch.on { background:rgba(0,245,255,0.2); border-color:var(--accent); }
+.toggle-knob { position:absolute; top:2px; left:2px; width:18px; height:18px; border-radius:50%; background:var(--text3); transition:all 0.2s; }
+.toggle-switch.on .toggle-knob { left:22px; background:var(--accent); box-shadow:var(--glow); }
+.section-label { font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:1px; padding:14px 20px 10px; flex-shrink:0; border-top:1px solid var(--border); }
+.game-id-card { margin:0 20px 10px; padding:14px; border-radius:14px; background:var(--card); border:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.game-id-icon { width:44px; height:44px; border-radius:12px; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; border:1px solid var(--border); }
+.game-id-info { flex:1; }
+.game-id-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; color:var(--text); }
+.game-id-val { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--accent); margin-top:2px; }
+.game-id-rank { font-size:11px; color:var(--text2); margin-top:2px; }
+.copy-btn-sm { padding:6px 12px; border-radius:8px; background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.3); color:var(--accent); font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:700; cursor:pointer; }
+
+/* ========== MESSAGES ========== */
+.msg-tabs { display:flex; border-bottom:1px solid var(--border); flex-shrink:0; }
+.msg-tab { flex:1; padding:12px; text-align:center; font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:600; color:var(--text2); cursor:pointer; border-bottom:2px solid transparent; transition:all 0.2s; }
+.msg-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.chat-item { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer; transition:background 0.2s; }
+.chat-item:active { background:var(--card); }
+.chat-avatar { width:50px; height:50px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; position:relative; border:2px solid var(--border); }
+.chat-avatar.group { border-radius:14px; }
+.chat-online { position:absolute; bottom:1px; right:1px; width:12px; height:12px; border-radius:50%; background:var(--green); border:2px solid var(--bg); }
+.chat-info { flex:1; min-width:0; }
+.chat-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:15px; color:var(--text); }
+.chat-last { font-size:12px; color:var(--text2); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chat-meta { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.chat-time { font-size:11px; color:var(--text3); }
+.chat-unread { width:20px; height:20px; border-radius:50%; background:var(--accent); color:#000; font-size:11px; font-family:'Rajdhani',sans-serif; font-weight:700; display:flex; align-items:center; justify-content:center; }
+
+/* ========== CHAT VIEW ========== */
+#chatview { z-index:10; }
+.chat-topbar { padding:12px 16px; display:flex; align-items:center; gap:12px; border-bottom:1px solid var(--border); background:var(--bg); flex-shrink:0; }
+.back-btn { font-size:22px; cursor:pointer; color:var(--text2); }
+.chat-topbar-avatar { width:38px; height:38px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid var(--border); }
+.chat-topbar-info { flex:1; }
+.chat-topbar-name { font-family:'Rajdhani',sans-serif; font-weight:700; font-size:16px; color:var(--text); }
+.chat-topbar-status { font-size:11px; color:var(--green); }
+.chat-msgs { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+.chat-msgs::-webkit-scrollbar { display:none; }
+.msg-bubble { max-width:75%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.5; }
+.msg-bubble.them { background:var(--card2); color:var(--text); border-bottom-left-radius:4px; align-self:flex-start; }
+.msg-bubble.me { background:linear-gradient(135deg,rgba(0,245,255,0.2),rgba(124,58,237,0.2)); color:var(--text); border:1px solid rgba(0,245,255,0.2); border-bottom-right-radius:4px; align-self:flex-end; }
+.msg-time { font-size:10px; color:var(--text3); margin-top:3px; }
+.msg-time.right { text-align:right; align-self:flex-end; }
+.msg-id-share { background:rgba(0,245,255,0.08); border:1px solid rgba(0,245,255,0.2); border-radius:12px; padding:10px 12px; align-self:flex-start; max-width:75%; }
+.msg-id-share-label { font-size:10px; color:var(--text3); margin-bottom:4px; }
+.msg-id-share-val { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--accent); }
+.chat-input-wrap { padding:10px 16px 16px; display:flex; gap:10px; border-top:1px solid var(--border); background:var(--bg); flex-shrink:0; }
+.chat-input { flex:1; padding:11px 16px; border-radius:24px; background:var(--card); border:1px solid var(--border); color:var(--text); font-size:14px; font-family:'Exo 2',sans-serif; outline:none; }
+.chat-input::placeholder { color:var(--text3); }
+.send-btn { width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; display:flex; align-items:center; justify-content:center; font-size:18px; cursor:pointer; flex-shrink:0; }
+
+/* ========== POST ========== */
+.post-screen { padding:20px; }
+.post-upload-area { width:100%; aspect-ratio:4/3; border-radius:16px; border:2px dashed var(--border); background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; cursor:pointer; margin-bottom:20px; transition:border-color 0.2s; }
+.post-upload-area:active { border-color:var(--accent); }
+.upload-icon { font-size:48px; }
+.upload-text { font-family:'Rajdhani',sans-serif; font-size:16px; color:var(--text2); font-weight:600; }
+.upload-sub { font-size:12px; color:var(--text3); }
+.form-label { font-family:'Rajdhani',sans-serif; font-size:13px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+.form-input { width:100%; padding:12px 16px; border-radius:12px; background:var(--card); border:1px solid var(--border); color:var(--text); font-size:14px; font-family:'Exo 2',sans-serif; outline:none; margin-bottom:16px; }
+.form-input:focus { border-color:var(--accent); }
+.form-input::placeholder { color:var(--text3); }
+.toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); margin-bottom:16px; }
+.toggle-row-label { font-size:14px; color:var(--text); }
+.toggle-row-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.post-btn { width:100%; padding:16px; border-radius:14px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; color:#000; font-family:'Rajdhani',sans-serif; font-size:17px; font-weight:700; letter-spacing:1px; cursor:pointer; margin-top:8px; }
+
+/* TOAST */
+.toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--card); border:1px solid var(--accent); color:var(--accent); padding:10px 20px; border-radius:24px; font-family:'Rajdhani',sans-serif; font-weight:600; font-size:14px; opacity:0; transition:all 0.3s; z-index:999; white-space:nowrap; box-shadow:var(--glow); }
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* SECTION */
+.section-title { font-family:'Rajdhani',sans-serif; font-size:16px; font-weight:700; color:var(--text2); padding:16px 16px 10px; text-transform:uppercase; letter-spacing:1px; }
+
+/* Notif */
+.notif-item { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+.notif-icon { width:44px; height:44px; border-radius:50%; background:var(--card2); display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+.notif-text { flex:1; font-size:13px; color:var(--text2); line-height:1.5; }
+.notif-text strong { color:var(--text); }
+.notif-time { font-size:11px; color:var(--text3); margin-top:4px; }
+
+</style>
 </head>
 <body>
+<div id="app">
 
-    <h1>This is a Heading</h1>
-    <p>This is a paragraph of text.</p>
-    
-    <!-- Link Example -->
-    <a href="https://google.com">Visit Google</a>
+  <!-- LANDING -->
+  <div class="screen" id="landing">
+    <div class="landing-bg"></div>
+    <div class="landing-content">
+      <div class="landing-logo-wrap">🎮</div>
+      <div class="landing-title">FindMySquad</div>
+      <div class="landing-sub">The <span>gaming identity platform</span> — find teammates, drop your ID, build your squad.</div>
+      <div class="landing-tags">
+        <div class="tag">🔫 Free Fire</div>
+        <div class="tag">🎯 BGMI</div>
+        <div class="tag">⚔️ Valorant</div>
+        <div class="tag">💥 COD</div>
+        <div class="tag">🏆 Esports</div>
+      </div>
+      <button class="btn-primary" onclick="goTo('feed')">Get Started — It's Free</button>
+      <button class="btn-secondary" onclick="goTo('feed')">Sign In</button>
+    </div>
+  </div>
 
-    <!-- Image Example -->
-    <img src="image-url.jpg" alt="Description of image" width="300">
+  <!-- FEED -->
+  <div class="screen hidden" id="feed">
+    <div class="topbar">
+      <div class="topbar-logo">FindMySquad</div>
+      <div style="display:flex;gap:10px;">
+        <div class="topbar-icon" onclick="goTo('notif')">🔔</div>
+        <div class="topbar-icon" onclick="goTo('profile')">👤</div>
+      </div>
+    </div>
+    <div class="scroll-content" id="feed-scroll">
 
+      <!-- Post 1 -->
+      <div class="feed-item">
+        <div class="feed-header">
+          <div class="feed-avatar">🦅</div>
+          <div class="feed-user-info">
+            <div class="feed-username">ShadowStrike_FF</div>
+            <div class="feed-game-tag">🔫 Free Fire • Heroic Rank</div>
+          </div>
+          <button class="feed-follow-btn" onclick="toggleFollow(this)">Follow</button>
+        </div>
+        <div class="feed-video">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#0a1628,#1a0a2e);display:flex;align-items:center;justify-content:center;font-size:80px;">🎮</div>
+          <div class="feed-game-label">🔫 Free Fire</div>
+          <div class="feed-video-overlay"><div class="play-btn">▶️</div></div>
+          <div class="feed-id-badge">
+            <div class="feed-id-text">ID: 4829103847</div>
+            <button class="copy-id-btn" onclick="copyID('4829103847')">Copy ID</button>
+          </div>
+        </div>
+        <div class="feed-actions">
+          <button class="action-btn" onclick="toggleLike(this)"><span>🤍</span> <span class="cnt">1.2K</span></button>
+          <button class="action-btn" onclick="goTo('chatview')"><span>💬</span> 84</button>
+          <button class="action-btn"><span>↗️</span> Share</button>
+        </div>
+        <div class="feed-caption"><strong>ShadowStrike_FF</strong> 4v1 clutch in ranked 🔥 Drop your ID below if you wanna squad up! Team: <strong>@PhantomCrew</strong></div>
+        <div class="feed-connect">
+          <button class="connect-ig">📸 Instagram</button>
+          <button class="connect-game">🎮 Add in Game</button>
+        </div>
+      </div>
+
+      <!-- Post 2 -->
+      <div class="feed-item">
+        <div class="feed-header">
+          <div class="feed-avatar">🐉</div>
+          <div class="feed-user-info">
+            <div class="feed-username">DragonAce_BGMI</div>
+            <div class="feed-game-tag">🎯 BGMI • Conqueror</div>
+          </div>
+          <button class="feed-follow-btn following" onclick="toggleFollow(this)">Following</button>
+        </div>
+        <div class="feed-video">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#0f2010,#1a1a0a);display:flex;align-items:center;justify-content:center;font-size:80px;">🏆</div>
+          <div class="feed-game-label">🎯 BGMI</div>
+          <div class="feed-video-overlay"><div class="play-btn">▶️</div></div>
+          <div class="feed-id-badge">
+            <div class="feed-id-text">ID: 5192837465</div>
+            <button class="copy-id-btn" onclick="copyID('5192837465')">Copy ID</button>
+          </div>
+        </div>
+        <div class="feed-actions">
+          <button class="action-btn liked"><span>❤️</span> <span class="cnt">3.4K</span></button>
+          <button class="action-btn"><span>💬</span> 210</button>
+          <button class="action-btn"><span>↗️</span> Share</button>
+        </div>
+        <div class="feed-caption"><strong>DragonAce_BGMI</strong> Conqueror push highlights 🐉 LFT — Looking for serious 4-man squad for scrims. DM me!</div>
+        <div class="feed-connect">
+          <button class="connect-ig">📸 Instagram</button>
+          <button class="connect-game">🎮 Add in Game</button>
+        </div>
+      </div>
+
+      <!-- Post 3 -->
+      <div class="feed-item">
+        <div class="feed-header">
+          <div class="feed-avatar">⚡</div>
+          <div class="feed-user-info">
+            <div class="feed-username">VoltX_Valorant</div>
+            <div class="feed-game-tag">⚔️ Valorant • Diamond 2</div>
+          </div>
+          <button class="feed-follow-btn" onclick="toggleFollow(this)">Follow</button>
+        </div>
+        <div class="feed-video">
+          <div style="width:100%;height:100%;background:linear-gradient(135deg,#0d0a20,#200a1a);display:flex;align-items:center;justify-content:center;font-size:80px;">⚡</div>
+          <div class="feed-game-label">⚔️ Valorant</div>
+          <div class="feed-video-overlay"><div class="play-btn">▶️</div></div>
+        </div>
+        <div class="feed-actions">
+          <button class="action-btn" onclick="toggleLike(this)"><span>🤍</span> <span class="cnt">892</span></button>
+          <button class="action-btn"><span>💬</span> 67</button>
+          <button class="action-btn"><span>↗️</span> Share</button>
+        </div>
+        <div class="feed-caption"><strong>VoltX_Valorant</strong> Ace with Jett on Bind 🗡️ No team mentioned — solo carry. Find me on Discord!</div>
+        <div class="feed-connect">
+          <button class="connect-ig">📸 Instagram</button>
+          <button class="connect-game">🎮 Discord</button>
+        </div>
+      </div>
+
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item active" onclick="navTo('feed',this)"><div class="nav-icon">🏠</div><div class="nav-label">FEED</div></div>
+      <div class="nav-item" onclick="navTo('hunt',this)"><div class="nav-icon">🔍</div><div class="nav-label">HUNT</div></div>
+      <div class="nav-post" onclick="navTo('post',document.querySelector('#feed .nav-item'))"><div class="nav-post-btn">➕</div></div>
+      <div class="nav-item" onclick="navTo('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">DMS</div></div>
+      <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+    </div>
+  </div>
+
+  <!-- HUNT -->
+  <div class="screen hidden" id="hunt">
+    <div class="topbar"><div class="topbar-title">Hunt Players 🔍</div></div>
+    <div class="search-bar-wrap">
+      <input class="search-bar" placeholder="Search by username, game ID, game..." type="text">
+    </div>
+    <div class="filter-row">
+      <div class="filter-chip active">All Games</div>
+      <div class="filter-chip" onclick="filterClick(this)">Free Fire</div>
+      <div class="filter-chip" onclick="filterClick(this)">BGMI</div>
+      <div class="filter-chip" onclick="filterClick(this)">Valorant</div>
+      <div class="filter-chip" onclick="filterClick(this)">COD</div>
+      <div class="filter-chip" onclick="filterClick(this)">Open to Squad</div>
+    </div>
+    <div class="scroll-content">
+      <div class="section-title">🔥 Top Players</div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">🦅<div class="online-dot"></div></div>
+        <div class="player-card-info">
+          <div class="player-card-name">ShadowStrike_FF</div>
+          <div class="player-card-meta">Free Fire • Heroic • India 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">Free Fire</div><div class="game-chip">BGMI</div></div>
+        </div>
+        <div class="squad-badge">Open to Squad</div>
+      </div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">🐉</div>
+        <div class="player-card-info">
+          <div class="player-card-name">DragonAce_BGMI</div>
+          <div class="player-card-meta">BGMI • Conqueror • India 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">BGMI</div></div>
+        </div>
+        <div class="squad-badge">Open to Squad</div>
+      </div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">⚡</div>
+        <div class="player-card-info">
+          <div class="player-card-name">VoltX_Valorant</div>
+          <div class="player-card-meta">Valorant • Diamond 2 • India 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">Valorant</div></div>
+        </div>
+      </div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">🔥<div class="online-dot"></div></div>
+        <div class="player-card-info">
+          <div class="player-card-name">BlazeFire_COD</div>
+          <div class="player-card-meta">COD Mobile • Grand Master • India 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">COD</div><div class="game-chip">Free Fire</div></div>
+        </div>
+        <div class="squad-badge">Open to Squad</div>
+      </div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">🌙</div>
+        <div class="player-card-info">
+          <div class="player-card-name">NightOwl_FF</div>
+          <div class="player-card-meta">Free Fire • Diamond • Maharashtra 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">Free Fire</div></div>
+        </div>
+      </div>
+      <div class="player-card" onclick="goTo('playerprofile')">
+        <div class="player-card-avatar">🎯<div class="online-dot"></div></div>
+        <div class="player-card-info">
+          <div class="player-card-name">AimBot_BGMI</div>
+          <div class="player-card-meta">BGMI • Ace • Delhi 🇮🇳</div>
+          <div class="player-card-games"><div class="game-chip">BGMI</div><div class="game-chip">Valorant</div></div>
+        </div>
+        <div class="squad-badge">Open to Squad</div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="navTo('feed',this)"><div class="nav-icon">🏠</div><div class="nav-label">FEED</div></div>
+      <div class="nav-item active" onclick="navTo('hunt',this)"><div class="nav-icon">🔍</div><div class="nav-label">HUNT</div></div>
+      <div class="nav-post" onclick="navTo('post',document.querySelector('#hunt .nav-item'))"><div class="nav-post-btn">➕</div></div>
+      <div class="nav-item" onclick="navTo('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">DMS</div></div>
+      <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+    </div>
+  </div>
+
+  <!-- POST -->
+  <div class="screen hidden" id="post">
+    <div class="topbar"><div class="topbar-title">New Post ➕</div></div>
+    <div class="scroll-content">
+      <div class="post-screen">
+        <div class="post-upload-area" onclick="showToast('📁 File picker would open here')">
+          <div class="upload-icon">🎬</div>
+          <div class="upload-text">Upload Gameplay Clip</div>
+          <div class="upload-sub">MP4, MOV — Max 60 seconds</div>
+        </div>
+        <div class="form-label">Caption</div>
+        <input class="form-input" placeholder="Describe your clip...">
+        <div class="form-label">Tag Your Game</div>
+        <input class="form-input" placeholder="e.g. Free Fire, BGMI, Valorant...">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-row-label">Tag My Game ID</div>
+            <div class="toggle-row-sub">Let viewers copy your ID from this post</div>
+          </div>
+          <div class="toggle-switch on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+        <div class="form-label">Mention Team (Optional)</div>
+        <input class="form-input" placeholder="e.g. @PhantomCrew">
+        <button class="post-btn" onclick="showToast('🚀 Post uploaded successfully!')">Post Now</button>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="navTo('feed',this)"><div class="nav-icon">🏠</div><div class="nav-label">FEED</div></div>
+      <div class="nav-item" onclick="navTo('hunt',this)"><div class="nav-icon">🔍</div><div class="nav-label">HUNT</div></div>
+      <div class="nav-post"><div class="nav-post-btn" style="background:rgba(0,245,255,0.3);">➕</div></div>
+      <div class="nav-item" onclick="navTo('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">DMS</div></div>
+      <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="screen hidden" id="messages">
+    <div class="topbar"><div class="topbar-title">Messages 💬</div><div class="topbar-icon">✏️</div></div>
+    <div class="msg-tabs">
+      <div class="msg-tab active" onclick="msgTab(this,'dms')">Direct DMs</div>
+      <div class="msg-tab" onclick="msgTab(this,'groups')">Group Chats</div>
+    </div>
+    <div class="scroll-content" id="dms-tab">
+      <div class="chat-item" onclick="goTo('chatview')">
+        <div class="chat-avatar">🦅<div class="chat-online"></div></div>
+        <div class="chat-info">
+          <div class="chat-name">ShadowStrike_FF</div>
+          <div class="chat-last">Bhai kal raat ko rank push karte hain?</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">2m ago</div><div class="chat-unread">3</div></div>
+      </div>
+      <div class="chat-item" onclick="goTo('chatview')">
+        <div class="chat-avatar">🐉</div>
+        <div class="chat-info">
+          <div class="chat-name">DragonAce_BGMI</div>
+          <div class="chat-last">My BGMI ID: 5192837465</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">1h ago</div></div>
+      </div>
+      <div class="chat-item" onclick="goTo('chatview')">
+        <div class="chat-avatar">⚡</div>
+        <div class="chat-info">
+          <div class="chat-name">VoltX_Valorant</div>
+          <div class="chat-last">gg wp bro that clutch was insane 🔥</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">3h ago</div><div class="chat-unread">1</div></div>
+      </div>
+    </div>
+    <div class="scroll-content" id="groups-tab" style="display:none;">
+      <div class="chat-item" onclick="goTo('groupchat')">
+        <div class="chat-avatar group">⚔️</div>
+        <div class="chat-info">
+          <div class="chat-name">PhantomCrew Squad</div>
+          <div class="chat-last">ShadowStrike: Aaj raat 9 baje ready raho!</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">5m ago</div><div class="chat-unread">7</div></div>
+      </div>
+      <div class="chat-item" onclick="goTo('groupchat')">
+        <div class="chat-avatar group">🎯</div>
+        <div class="chat-info">
+          <div class="chat-name">FF India Scrims 🇮🇳</div>
+          <div class="chat-last">Anyone up for Zone practice?</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">20m ago</div><div class="chat-unread">12</div></div>
+      </div>
+      <div class="chat-item" onclick="goTo('groupchat')">
+        <div class="chat-avatar group">🏆</div>
+        <div class="chat-info">
+          <div class="chat-name">BGMI Tournament Team</div>
+          <div class="chat-last">DragonAce: Registration deadline tonight</div>
+        </div>
+        <div class="chat-meta"><div class="chat-time">1h ago</div></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="navTo('feed',this)"><div class="nav-icon">🏠</div><div class="nav-label">FEED</div></div>
+      <div class="nav-item" onclick="navTo('hunt',this)"><div class="nav-icon">🔍</div><div class="nav-label">HUNT</div></div>
+      <div class="nav-post" onclick="navTo('post',document.querySelector('#messages .nav-item'))"><div class="nav-post-btn">➕</div></div>
+      <div class="nav-item active" onclick="navTo('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">DMS</div></div>
+      <div class="nav-item" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+    </div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="screen hidden" id="profile">
+    <div class="scroll-content">
+      <div class="profile-banner"></div>
+      <div class="profile-info-wrap">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar">🎮</div>
+          <button class="profile-edit-btn">Edit Profile</button>
+        </div>
+        <div class="profile-name">You_GamingPro</div>
+        <div class="profile-handle">@you_gamingpro • India 🇮🇳</div>
+        <div class="profile-bio">Competitive gamer 🎮 Free Fire + BGMI | Looking for serious squad | Let's grind ranked! 🏆</div>
+        <div class="profile-stats">
+          <div class="stat-item"><div class="stat-num">247</div><div class="stat-label">Posts</div></div>
+          <div class="stat-item"><div class="stat-num">4.2K</div><div class="stat-label">Followers</div></div>
+          <div class="stat-item"><div class="stat-num">381</div><div class="stat-label">Following</div></div>
+        </div>
+        <div class="profile-social">
+          <button class="social-btn">📸 Instagram</button>
+          <button class="social-btn">💬 Discord</button>
+          <button class="social-btn">📱 WhatsApp</button>
+        </div>
+        <div class="squad-toggle">
+          <div>
+            <div class="squad-toggle-label">Open to Squad</div>
+            <div class="squad-toggle-sub">Let others know you're looking for team</div>
+          </div>
+          <div class="toggle-switch on" onclick="toggleSwitch(this)"><div class="toggle-knob"></div></div>
+        </div>
+      </div>
+      <div class="section-label">🎮 Game IDs</div>
+      <div class="game-id-card">
+        <div class="game-id-icon">🔫</div>
+        <div class="game-id-info">
+          <div class="game-id-name">Free Fire</div>
+          <div class="game-id-val">ID: 7483920156</div>
+          <div class="game-id-rank">🏆 Heroic • India Server</div>
+        </div>
+        <button class="copy-btn-sm" onclick="copyID('7483920156')">Copy</button>
+      </div>
+      <div class="game-id-card">
+        <div class="game-id-icon">🎯</div>
+        <div class="game-id-info">
+          <div class="game-id-name">BGMI</div>
+          <div class="game-id-val">ID: 5938271046</div>
+          <div class="game-id-rank">🏆 Ace • Asia Server</div>
+        </div>
+        <button class="copy-btn-sm" onclick="copyID('5938271046')">Copy</button>
+      </div>
+      <div class="game-id-card">
+        <div class="game-id-icon">⚔️</div>
+        <div class="game-id-info">
+          <div class="game-id-name">Valorant</div>
+          <div class="game-id-val">ID: YouGaming#IND</div>
+          <div class="game-id-rank">💎 Diamond 1</div>
+        </div>
+        <button class="copy-btn-sm" onclick="copyID('YouGaming#IND')">Copy</button>
+      </div>
+      <div style="height:80px;"></div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="navTo('feed',this)"><div class="nav-icon">🏠</div><div class="nav-label">FEED</div></div>
+      <div class="nav-item" onclick="navTo('hunt',this)"><div class="nav-icon">🔍</div><div class="nav-label">HUNT</div></div>
+      <div class="nav-post" onclick="navTo('post',document.querySelector('#profile .nav-item'))"><div class="nav-post-btn">➕</div></div>
+      <div class="nav-item" onclick="navTo('messages',this)"><div class="nav-icon">💬</div><div class="nav-label">DMS</div></div>
+      <div class="nav-item active" onclick="navTo('profile',this)"><div class="nav-icon">👤</div><div class="nav-label">PROFILE</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT VIEW (DM) -->
+  <div class="screen hidden" id="chatview">
+    <div class="chat-topbar">
+      <div class="back-btn" onclick="goBack()">←</div>
+      <div class="chat-topbar-avatar">🦅</div>
+      <div class="chat-topbar-info">
+        <div class="chat-topbar-name">ShadowStrike_FF</div>
+        <div class="chat-topbar-status">● Online</div>
+      </div>
+      <div class="topbar-icon">👤</div>
+    </div>
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="msg-bubble them">Bhai tera Free Fire ID kya hai? Kal ke scrims ke liye add karna tha 🔥</div>
+      <div class="msg-time">11:32 AM</div>
+      <div class="msg-id-share">
+        <div class="msg-id-share-label">🎮 Shared Game ID</div>
+        <div class="msg-id-share-val">FF ID: 7483920156</div>
+      </div>
+      <div class="msg-time">11:33 AM</div>
+      <div class="msg-bubble me">Ye raha mera ID bhai! Heroic rank pe hoon abhi, grind kar raha hoon Conqueror ke liye 💪</div>
+      <div class="msg-time right">11:33 AM</div>
+      <div class="msg-bubble them">Nice bro! Aaj raat 9 baje khelte hain? Team missing hai ek player</div>
+      <div class="msg-time">11:35 AM</div>
+      <div class="msg-bubble me">Haan bilkul! 9 baje ready rahenge. Discord pe bhi add kar le 🎯</div>
+      <div class="msg-time right">11:36 AM</div>
+      <div class="msg-bubble them">Bhai kal raat ko rank push karte hain?</div>
+      <div class="msg-time">2m ago</div>
+    </div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" id="chat-input" placeholder="Message..." onkeypress="sendMsg(event)">
+      <button class="send-btn" onclick="sendMsgBtn()">➤</button>
+    </div>
+  </div>
+
+  <!-- GROUP CHAT -->
+  <div class="screen hidden" id="groupchat">
+    <div class="chat-topbar">
+      <div class="back-btn" onclick="goBack()">←</div>
+      <div class="chat-topbar-avatar" style="border-radius:10px;">⚔️</div>
+      <div class="chat-topbar-info">
+        <div class="chat-topbar-name">PhantomCrew Squad</div>
+        <div class="chat-topbar-status">4 members</div>
+      </div>
+      <div class="topbar-icon">ℹ️</div>
+    </div>
+    <div class="chat-msgs">
+      <div style="text-align:center;font-size:11px;color:var(--text3);padding:8px;">Group created by ShadowStrike_FF</div>
+      <div class="msg-bubble them"><strong style="color:var(--accent);font-size:11px;">ShadowStrike_FF</strong><br>Aaj raat 9 baje ready raho! Tournament practice hai 🏆</div>
+      <div class="msg-time">8:15 PM</div>
+      <div class="msg-bubble them"><strong style="color:#a78bfa;font-size:11px;">DragonAce_BGMI</strong><br>Ready bhai! My BGMI ID for tonight: 5192837465</div>
+      <div class="msg-time">8:20 PM</div>
+      <div class="msg-bubble me">Haan bhai main bhi ready hoon! 💪 9 baje log in karunga</div>
+      <div class="msg-time right">8:22 PM</div>
+      <div class="msg-bubble them"><strong style="color:#f59e0b;font-size:11px;">VoltX_Valorant</strong><br>Kal ka plan kya hai? Same time?</div>
+      <div class="msg-time">8:45 PM</div>
+      <div class="msg-bubble them"><strong style="color:var(--accent);font-size:11px;">ShadowStrike_FF</strong><br>Aaj raat 9 baje ready raho!</div>
+      <div class="msg-time">5m ago</div>
+    </div>
+    <div class="chat-input-wrap">
+      <input class="chat-input" placeholder="Message group..." onkeypress="sendMsg(event)">
+      <button class="send-btn" onclick="showToast('✉️ Message sent!')">➤</button>
+    </div>
+  </div>
+
+  <!-- PLAYER PROFILE (other user) -->
+  <div class="screen hidden" id="playerprofile">
+    <div class="topbar">
+      <div class="back-btn" style="font-size:22px;cursor:pointer;color:var(--text2);" onclick="goBack()">←</div>
+      <div class="topbar-title">Player Profile</div>
+      <div class="topbar-icon">⋯</div>
+    </div>
+    <div class="scroll-content">
+      <div class="profile-banner"></div>
+      <div class="profile-info-wrap">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar">🦅</div>
+          <button class="btn-primary" style="width:auto;padding:10px 24px;font-size:14px;margin:0;" onclick="showToast('✅ Now following ShadowStrike_FF!')">Follow</button>
+        </div>
+        <div class="profile-name">ShadowStrike_FF</div>
+        <div class="profile-handle">@shadowstrike_ff • India 🇮🇳</div>
+        <div class="profile-bio">Competitive FF player 🔫 Heroic rank | Part of @PhantomCrew | Drop your ID below let's play!</div>
+        <div class="profile-stats">
+          <div class="stat-item"><div class="stat-num">89</div><div class="stat-label">Posts</div></div>
+          <div class="stat-item"><div class="stat-num">12.4K</div><div class="stat-label">Followers</div></div>
+          <div class="stat-item"><div class="stat-num">203</div><div class="stat-label">Following</div></div>
+        </div>
+        <div class="profile-social">
+          <button class="social-btn" onclick="showToast('📸 Opening Instagram...')">📸 Instagram</button>
+          <button class="social-btn" onclick="goTo('chatview')">💬 Message</button>
+        </div>
+        <div style="padding:8px 0 4px;display:flex;align-items:center;gap:8px;">
+          <div style="padding:6px 14px;border-radius:20px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);font-size:12px;color:var(--green);font-family:'Rajdhani',sans-serif;font-weight:700;">✅ Open to Squad</div>
+        </div>
+      </div>
+      <div class="section-label">🎮 Game IDs</div>
+      <div class="game-id-card">
+        <div class="game-id-icon">🔫</div>
+        <div class="game-id-info">
+          <div class="game-id-name">Free Fire</div>
+          <div class="game-id-val">ID: 4829103847</div>
+          <div class="game-id-rank">🏆 Heroic • India Server</div>
+        </div>
+        <button class="copy-btn-sm" onclick="copyID('4829103847')">Copy</button>
+      </div>
+      <div style="height:40px;"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS -->
+  <div class="screen hidden" id="notif">
+    <div class="topbar">
+      <div class="back-btn" style="font-size:22px;cursor:pointer;color:var(--text2);" onclick="goBack()">←</div>
+      <div class="topbar-title">Notifications 🔔</div>
+    </div>
+    <div class="scroll-content">
+      <div class="notif-item">
+        <div class="notif-icon">🦅</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>ShadowStrike_FF</strong> started following you</div>
+          <div class="notif-time">2 minutes ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">❤️</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>DragonAce_BGMI</strong> liked your post</div>
+          <div class="notif-time">15 minutes ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">🎮</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>VoltX_Valorant</strong> copied your Game ID from your post</div>
+          <div class="notif-time">1 hour ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">💬</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>BlazeFire_COD</strong> commented: "Bhai tera aim OP hai! 🔥"</div>
+          <div class="notif-time">2 hours ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">👥</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>ShadowStrike_FF</strong> added you to <strong>PhantomCrew Squad</strong> group</div>
+          <div class="notif-time">3 hours ago</div>
+        </div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-icon">❤️</div>
+        <div class="notif-info">
+          <div class="notif-text"><strong>NightOwl_FF</strong> and <strong>12 others</strong> liked your clip</div>
+          <div class="notif-time">5 hours ago</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+let history = ['landing'];
+let currentScreen = 'landing';
+
+function goTo(id) {
+  const prev = document.getElementById(currentScreen);
+  const next = document.getElementById(id);
+  if (!next || id === currentScreen) return;
+  prev.classList.add('slide-left');
+  next.classList.remove('hidden');
+  next.classList.remove('slide-left');
+  history.push(id);
+  currentScreen = id;
+}
+
+function goBack() {
+  if (history.length <= 1) return;
+  history.pop();
+  const prev = currentScreen;
+  const next = history[history.length - 1];
+  document.getElementById(prev).classList.add('hidden');
+  document.getElementById(prev).classList.remove('slide-left');
+  document.getElementById(next).classList.remove('slide-left');
+  document.getElementById(next).classList.remove('hidden');
+  currentScreen = next;
+}
+
+function navTo(id, el) {
+  const screens = ['feed','hunt','post','messages','profile'];
+  screens.forEach(s => {
+    const sc = document.getElementById(s);
+    if (s === id) { sc.classList.remove('hidden'); sc.classList.remove('slide-left'); }
+    else { sc.classList.add('hidden'); sc.classList.remove('slide-left'); }
+  });
+  // update active nav in current screen
+  document.querySelectorAll('#'+id+' .nav-item').forEach(n => n.classList.remove('active'));
+  if (el && el.classList.contains('nav-item')) el.classList.add('active');
+  history = [id];
+  currentScreen = id;
+}
+
+function toggleFollow(btn) {
+  if (btn.classList.contains('following')) {
+    btn.classList.remove('following');
+    btn.textContent = 'Follow';
+  } else {
+    btn.classList.add('following');
+    btn.textContent = 'Following';
+    showToast('✅ Following!');
+  }
+}
+
+function toggleLike(btn) {
+  const span = btn.querySelector('span');
+  const cnt = btn.querySelector('.cnt');
+  if (btn.classList.contains('liked')) {
+    btn.classList.remove('liked');
+    span.textContent = '🤍';
+  } else {
+    btn.classList.add('liked');
+    span.textContent = '❤️';
+    showToast('❤️ Liked!');
+  }
+}
+
+function copyID(id) {
+  if (navigator.clipboard) navigator.clipboard.writeText(id).catch(()=>{});
+  showToast('📋 ID Copied: ' + id);
+}
+
+function filterClick(el) {
+  document.querySelectorAll('#hunt .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function msgTab(el, tab) {
+  document.querySelectorAll('.msg-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('dms-tab').style.display = tab === 'dms' ? 'block' : 'none';
+  document.getElementById('groups-tab').style.display = tab === 'groups' ? 'block' : 'none';
+}
+
+function toggleSwitch(el) {
+  el.classList.toggle('on');
+}
+
+function sendMsg(e) {
+  if (e.key === 'Enter') sendMsgBtn();
+}
+
+function sendMsgBtn() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chat-msgs');
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble me';
+  bubble.textContent = text;
+  const time = document.createElement('div');
+  time.className = 'msg-time right';
+  time.textContent = 'now';
+  msgs.appendChild(bubble);
+  msgs.appendChild(time);
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
 </body>
 </html>
